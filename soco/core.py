@@ -162,6 +162,7 @@ class SoCo(_SocoSingletonBase):
         bass
         treble
         loudness
+        night_mode
         cross_fade
         status_light
         player_name
@@ -688,6 +689,27 @@ class SoCo(_SocoSingletonBase):
             ('InstanceID', 0),
             ('Channel', 'Master'),
             ('DesiredLoudness', loudness_value)
+        ])
+
+    @property
+    def night_mode(self):
+        """The Sonos speaker's night mode if supported. True if on, otherwise
+        False.
+        """
+        response = self.renderingControl.GetEQ([
+            ('InstanceID', 0),
+            ('EQType', 'NightMode')
+        ])
+        night_mode = int(response['CurrentValue'])
+        return bool(night_mode)
+
+    @night_mode.setter
+    def night_mode(self, night_mode):
+        """Switch on/off the speaker's night mode."""
+        self.renderingControl.SetEQ([
+            ('InstanceID', 0),
+            ('EQType', 'NightMode'),
+            ('DesiredValue', int(night_mode))
         ])
 
     def _parse_zone_group_state(self):
