@@ -315,6 +315,15 @@ class SoCo(_SocoSingletonBase):
         self._parse_zone_group_state()
         return self._is_bridge
 
+    def is_playbar(self):
+        """Is this zone a playbar?
+
+        return True or False
+        """
+        if not self.speaker_info:
+            self.get_speaker_info()
+        return 'PLAYBAR' in self.speaker_info['model_name']
+
     @property
     def is_coordinator(self):
         """Return True if this zone is a group coordinator, otherwise False.
@@ -696,21 +705,24 @@ class SoCo(_SocoSingletonBase):
         """The Sonos speaker's dialog mode if supported. True if on, otherwise
         False.
         """
-        response = self.renderingControl.GetEQ([
-            ('InstanceID', 0),
-            ('EQType', 'DialogLevel')
-        ])
-        dialog_mode = int(response['CurrentValue'])
-        return bool(dialog_mode)
+        dialog_mode = False
+        if self.is_playbar():
+            response = self.renderingControl.GetEQ([
+                ('InstanceID', 0),
+                ('EQType', 'DialogLevel')
+            ])
+            dialog_mode = bool(int(response['CurrentValue']))
+        return dialog_mode
 
     @dialog_mode.setter
     def dialog_mode(self, dialog_mode):
         """Switch on/off the speaker's dialog mode."""
-        self.renderingControl.SetEQ([
-            ('InstanceID', 0),
-            ('EQType', 'DialogLevel'),
-            ('DesiredValue', int(dialog_mode))
-        ])
+        if self.is_playbar():
+            self.renderingControl.SetEQ([
+                ('InstanceID', 0),
+                ('EQType', 'DialogLevel'),
+                ('DesiredValue', int(dialog_mode))
+            ])
 
     def _parse_zone_group_state(self):
         """The Zone Group State contains a lot of useful information.
