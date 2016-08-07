@@ -711,8 +711,8 @@ class SoCo(_SocoSingletonBase):
                 ('InstanceID', 0),
                 ('EQType', 'NightMode')
             ])
-            night_mode = int(response['CurrentValue'])
-        return bool(night_mode)
+            night_mode = bool(int(response['CurrentValue']))
+        return night_mode
 
     @night_mode.setter
     def night_mode(self, night_mode):
