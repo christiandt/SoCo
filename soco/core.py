@@ -163,6 +163,7 @@ class SoCo(_SocoSingletonBase):
         treble
         loudness
         night_mode
+        dialog_mode
         cross_fade
         status_light
         player_name
@@ -722,6 +723,30 @@ class SoCo(_SocoSingletonBase):
                 ('InstanceID', 0),
                 ('EQType', 'NightMode'),
                 ('DesiredValue', int(night_mode))
+            ])
+
+    @property
+    def dialog_mode(self):
+        """The Sonos speaker's dialog mode if supported. True if on, otherwise
+        False.
+        """
+        dialog_mode = False
+        if self.is_playbar():
+            response = self.renderingControl.GetEQ([
+                ('InstanceID', 0),
+                ('EQType', 'DialogLevel')
+            ])
+            dialog_mode = bool(int(response['CurrentValue']))
+        return dialog_mode
+
+    @dialog_mode.setter
+    def dialog_mode(self, dialog_mode):
+        """Switch on/off the speaker's dialog mode."""
+        if self.is_playbar():
+            self.renderingControl.SetEQ([
+                ('InstanceID', 0),
+                ('EQType', 'DialogLevel'),
+                ('DesiredValue', int(dialog_mode))
             ])
 
     def _parse_zone_group_state(self):
